@@ -45,67 +45,22 @@ export interface SplitOptions {
   append?: string
 }
 
-// /**
-//  * Splits a string into multiple chunks at a designated character that do not exceed a specific length.
-//  * @param {string} text Content to split
-//  * @param {SplitOptions} [options] Options controlling the behavior of the split
-//  * @deprecated This will be removed in the next major version.
-//  * @returns {string[]}
-//  */
-// function splitMessage(
-//   text: string,
-//   { maxLength = 2000, char = '\n', prepend = '', append = '' } = {}
-// ) {
-//   if (!deprecationEmittedForSplitMessage) {
-//     process.emitWarning(
-//       'The Util.splitMessage method is deprecated and will be removed in the next major version.',
-//       'DeprecationWarning'
-//     )
-
-//     deprecationEmittedForSplitMessage = true
-//   }
-
-//   text = Util.verifyString(text)
-//   if (text.length <= maxLength) return [text]
-//   let splitText = [text]
-//   if (Array.isArray(char)) {
-//     while (
-//       char.length > 0 &&
-//       splitText.some(element => element.length > maxLength)
-//     ) {
-//       const currentChar = char.shift()
-//       splitText =
-//         currentChar instanceof RegExp
-//           ? splitText.flatMap(chunk => chunk.match(currentChar))
-//           : splitText.flatMap(chunk => chunk.split(currentChar))
-//     }
-//   } else {
-//     splitText = text.split(char)
-//   }
-
-//   if (splitText.some(element => element.length > maxLength))
-//     throw new RangeError('SPLIT_MAX_LEN')
-//   const messages = []
-//   let message = ''
-//   for (const chunk of splitText) {
-//     if (message && (message + char + chunk + append).length > maxLength) {
-//       messages.push(message + append)
-//       message = prepend
-//     }
-
-//     message += (message && message !== prepend ? char : '') + chunk
-//   }
-
-//   return messages.concat(message).filter(Boolean)
-// }
-
+/**
+ * Splits a string into multiple chunks at a designated character that do not exceed a specific length
+ * @param text Content to split
+ * @param options Options controlling the behavior of the split
+ */
 export const splitMessage: (
   text: string,
   options?: SplitOptions
-) => string[] = (text, { maxLength = 2000, char = '\n' } = {}) => {
-  if (text.length <= maxLength) return [text]
-  let messages = [text]
+) => string[] = (
+  text,
+  { maxLength = 2000, char = '\n', prepend = '', append = '' } = {}
+) => {
+  const txt = verifyString(text)
+  if (txt.length <= maxLength) return [txt]
 
+  let messages = [txt]
   if (Array.isArray(char)) {
     while (
       char.length > 0 &&
@@ -122,12 +77,23 @@ export const splitMessage: (
       )
     }
   } else {
-    messages = text.split(char)
+    messages = txt.split(char)
   }
 
   if (messages.some(element => element.length > maxLength)) {
     throw new RangeError('SPLIT_MAX_LEN')
   }
+
+  messages.map((line, idx) => {
+    const isFirst = idx === 0
+    const isLast = idx - 1 === messages.length
+
+    return isFirst
+      ? `${line}${append}`
+      : isLast
+      ? `${prepend}${line}`
+      : `${prepend}${line}${append}`
+  })
 
   return messages
 }
