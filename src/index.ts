@@ -1,20 +1,21 @@
 /**
  * Verifies the provided data is a string, otherwise throws provided error
- * @param data The string resolvable to resolve
- * @param error The Error constructor to instantiate [default: `Error`]
- * @param errorMessage The error message to throw with [default: "Expected string, got <data> instead."]
- * @param allowEmpty Whether an empty string should be allowed [default: true]
+ *
+ * @param data - The string resolvable to resolve
+ * @param error - The Error constructor to instantiate [default: `Error`]
+ * @param errorMessage - The error message to throw with [default: "Expected string, got <data> instead."]
+ * @param allowEmpty - Whether an empty string should be allowed [default: true]
  */
 export const verifyString: (
   data: unknown,
   error?: ErrorConstructor,
   errorMessage?: string,
-  allowEmpty?: boolean
+  allowEmpty?: boolean,
 ) => string = (
   data,
   error = Error,
   errorMessage = `Expected a string, got ${data} instead.`,
-  allowEmpty = true
+  allowEmpty = true,
 ) => {
   if (typeof data !== 'string') throw new error(errorMessage)
   if (!allowEmpty && data.length === 0) throw new error(errorMessage)
@@ -30,9 +31,9 @@ export interface SplitOptions {
 
   /**
    * Character(s) or Regex(es) to split the message with,
-   * an array can be used to split multiple times [default: '\n']
+   * an array can be used to split multiple times [default: '\\n']
    */
-  char?: string | string[] | RegExp | RegExp[]
+  char?: RegExp | RegExp[] | string[] | string
 
   /**
    * Text to prepend to every piece except the first [default: ""]
@@ -47,15 +48,15 @@ export interface SplitOptions {
 
 /**
  * Splits a string into multiple chunks at a designated character that do not exceed a specific length
- * @param text Content to split
- * @param options Options controlling the behavior of the split
+ *
+ * @param text - Content to split
  */
 export const splitMessage: (
   text: string,
-  options?: SplitOptions
+  options?: SplitOptions,
 ) => string[] = (
   text,
-  { maxLength = 2000, char = '\n', prepend = '', append = '' } = {}
+  { maxLength = 2_000, char = '\n', prepend = '', append = '' } = {},
 ) => {
   const txt = verifyString(text)
   if (txt.length <= maxLength) return [txt]
@@ -73,7 +74,7 @@ export const splitMessage: (
           : messages.flatMap(chunk => chunk.split(currentChar))
 
       messages = split.filter(
-        (chunk): chunk is string => typeof chunk === 'string'
+        (chunk): chunk is string => typeof chunk === 'string',
       )
     }
   } else {
@@ -84,7 +85,7 @@ export const splitMessage: (
     throw new RangeError('SPLIT_MAX_LEN')
   }
 
-  messages.map((line, idx) => {
+  return messages.map((line, idx) => {
     const isFirst = idx === 0
     const isLast = idx - 1 === messages.length
 
@@ -94,6 +95,4 @@ export const splitMessage: (
       ? `${prepend}${line}`
       : `${prepend}${line}${append}`
   })
-
-  return messages
 }
