@@ -54,11 +54,12 @@ export interface SplitOptions {
 export const splitMessage: (
   text: string,
   options?: SplitOptions,
-) => string[] = (
+) => [string, ...string[]] = (
   text,
   { maxLength = 2_000, char = '\n', prepend = '', append = '' } = {},
 ) => {
   const txt = verifyString(text)
+  if (char === '') throw new Error('split `char` must not be empty')
   if (txt.length <= maxLength) return [txt]
 
   let messages = [txt]
@@ -94,5 +95,5 @@ export const splitMessage: (
       : isLast
       ? `${prepend}${line}`
       : `${prepend}${line}${append}`
-  })
+  }) as [string, ...string[]]
 }
